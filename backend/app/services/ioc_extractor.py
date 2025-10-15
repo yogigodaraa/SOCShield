@@ -57,33 +57,45 @@ class IOCExtractor:
         emails = set(re.findall(self.EMAIL_PATTERN, text, re.IGNORECASE))
         return self._filter_valid_emails(list(emails))
     
-    def extract_urls(self, links: List[str], text: str = '') -> List[str]:
-        """Extract URLs"""
-        urls = set(links)
+    def extract_urls(self, text_or_links, text: str = '') -> List[str]:
+        """Extract URLs from text or list of links"""
+        urls = set()
         
-        # Also extract from text
-        if text:
-            found_urls = re.findall(self.URL_PATTERN, text)
+        # Handle both string and list inputs
+        if isinstance(text_or_links, list):
+            urls.update(text_or_links)
+            # Also extract from text parameter if provided
+            if text:
+                found_urls = re.findall(self.URL_PATTERN, text)
+                urls.update(found_urls)
+        else:
+            # text_or_links is a string
+            found_urls = re.findall(self.URL_PATTERN, text_or_links)
             urls.update(found_urls)
         
         return self._filter_valid_urls(list(urls))
     
-    def extract_domains(self, links: List[str], text: str = '') -> List[str]:
+    def extract_domains(self, text_or_links, text: str = '') -> List[str]:
         """Extract domains from URLs and text"""
         domains = set()
         
-        # Extract from URLs
-        for url in links:
-            try:
-                parsed = urlparse(url)
-                if parsed.netloc:
-                    domains.add(parsed.netloc.lower())
-            except:
-                pass
-        
-        # Extract from text
-        if text:
-            found_domains = re.findall(self.DOMAIN_PATTERN, text, re.IGNORECASE)
+        # Handle both string and list inputs
+        if isinstance(text_or_links, list):
+            # Extract from URLs in list
+            for url in text_or_links:
+                try:
+                    parsed = urlparse(url)
+                    if parsed.netloc:
+                        domains.add(parsed.netloc.lower())
+                except:
+                    pass
+            # Also extract from text parameter if provided
+            if text:
+                found_domains = re.findall(self.DOMAIN_PATTERN, text, re.IGNORECASE)
+                domains.update(d.lower() for d in found_domains)
+        else:
+            # text_or_links is a string
+            found_domains = re.findall(self.DOMAIN_PATTERN, text_or_links, re.IGNORECASE)
             domains.update(d.lower() for d in found_domains)
         
         return self._filter_valid_domains(list(domains))
@@ -92,6 +104,31 @@ class IOCExtractor:
         """Extract IP addresses"""
         ips = set(re.findall(self.IP_PATTERN, text))
         return self._filter_valid_ips(list(ips))
+    
+    # Alias methods for test compatibility
+    def extract_ip_addresses(self, text: str) -> List[str]:
+        """Alias for extract_ips"""
+        return self.extract_ips(text)
+    
+    def extract_email_addresses(self, text: str) -> List[str]:
+        """Alias for extract_emails"""
+        return self.extract_emails(text)
+    
+    def extract_file_hashes(self, text: str) -> List[str]:
+        """Extract file hashes (MD5, SHA1, SHA256)"""
+        hashes = []
+        # MD5: 32 hex chars
+        md5_pattern = r'\b[a-fA-F0-9]{32}\b'
+        # SHA1: 40 hex chars
+        sha1_pattern = r'\b[a-fA-F0-9]{40}\b'
+        # SHA256: 64 hex chars
+        sha256_pattern = r'\b[a-fA-F0-9]{64}\b'
+        
+        hashes.extend(re.findall(md5_pattern, text))
+        hashes.extend(re.findall(sha1_pattern, text))
+        hashes.extend(re.findall(sha256_pattern, text))
+        
+        return list(set(hashes))
     
     def _filter_valid_emails(self, emails: List[str]) -> List[str]:
         """Filter out invalid/common email addresses"""

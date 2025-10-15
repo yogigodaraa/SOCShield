@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Send, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Search, Send, Loader2, Upload, FileText } from 'lucide-react';
 import { analyzeEmail } from '@/lib/api';
 
 export default function AnalysisPanel() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     subject: '',
     sender: '',
@@ -40,6 +42,74 @@ export default function AnalysisPanel() {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFile(file);
+    
+    try {
+      const text = await file.text();
+      
+      // Simple email parsing - extract subject, sender, and body
+      const lines = text.split('\n');
+      let subject = '';
+      let sender = '';
+      let body = '';
+      let inBody = false;
+      const links: string[] = [];
+      
+      for (const line of lines) {
+        if (line.startsWith('Subject:')) {
+          subject = line.replace('Subject:', '').trim();
+        } else if (line.startsWith('From:')) {
+          sender = line.replace('From:', '').trim();
+          // Extract email from format "Name <email@domain.com>"
+          const emailMatch = sender.match(/<(.+?)>/);
+          if (emailMatch) {
+            sender = emailMatch[1];
+          }
+        } else if (line.trim() === '' && !inBody && subject && sender) {
+          inBody = true;
+        } else if (inBody) {
+          body += line + '\n';
+          // Extract links from body
+          const urlRegex = /(https?:\/\/[^\s]+)/g;
+          const matches = line.match(urlRegex);
+          if (matches) {
+            links.push(...matches);
+          }
+        }
+      }
+      
+      // If parsing failed, use entire content as body
+      if (!subject && !sender) {
+        body = text;
+        subject = 'Uploaded Email';
+        sender = 'unknown@example.com';
+      }
+      
+      setFormData({
+        subject: subject || 'Uploaded Email',
+        sender: sender || 'unknown@example.com',
+        body: body.trim(),
+        links: Array.from(new Set(links)).join('\n')
+      });
+      
+      alert('Email file loaded successfully! Click "Analyze Email" to process.');
+    } catch (error) {
+      console.error('File upload failed:', error);
+      alert('Failed to read file. Please try again.');
+    }
+  };
+
+  const handleClearFile = () => {
+    setUploadedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Input Form */}
@@ -47,6 +117,55 @@ export default function AnalysisPanel() {
         <div className="flex items-center mb-4">
           <Search className="w-5 h-5 text-gray-400 mr-2" />
           <h3 className="text-lg font-semibold">Analyze Email</h3>
+        </div>
+
+        {/* File Upload Section */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <Upload className="w-5 h-5 text-blue-600 mr-2" />
+              <span className="font-medium text-blue-900">Upload Email File</span>
+            </div>
+          </div>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".eml,.txt,.msg"
+            onChange={handleFileUpload}
+            className="hidden"
+            id="file-upload"
+          />
+          
+          {!uploadedFile ? (
+            <label
+              htmlFor="file-upload"
+              className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-100 transition"
+            >
+              <FileText className="w-5 h-5 text-blue-600 mr-2" />
+              <span className="text-sm text-blue-700">
+                Click to upload .eml, .txt, or .msg file
+              </span>
+            </label>
+          ) : (
+            <div className="flex items-center justify-between p-3 bg-white border border-blue-300 rounded-lg">
+              <div className="flex items-center">
+                <FileText className="w-5 h-5 text-blue-600 mr-2" />
+                <span className="text-sm text-gray-700">{uploadedFile.name}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleClearFile}
+                className="text-sm text-red-600 hover:text-red-700"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+          
+          <p className="text-xs text-gray-600 mt-2">
+            Upload an email file to auto-populate the form fields below
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
