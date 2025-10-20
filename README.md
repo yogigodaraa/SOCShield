@@ -19,15 +19,31 @@ An autonomous AI-driven tool designed to revolutionize the way Security Operatio
 - **Cost Savings**: $89K annually compared to traditional SOC operations
 - **Scalability**: Unlimited email processing capacity
 
-## 🏗️ Architecture
+## 🏗️ Project Structure
 
 ```
 SOCShield/
-├── frontend/          # Next.js dashboard application
-├── backend/           # Python API and AI processing
-├── database/          # PostgreSQL schemas and migrations
-└── docs/             # Additional documentation
+├── backend/           # Python FastAPI backend
+│   ├── app/          # Application code
+│   ├── tests/        # Backend tests
+│   └── .env          # Backend configuration
+├── frontend/          # Next.js dashboard
+│   ├── src/          # Source code
+│   └── .env.local    # Frontend configuration
+├── scripts/           # Automation scripts
+│   ├── start-services.sh
+│   └── stop-services.sh
+├── config/            # Configuration files
+│   └── docker-compose.yml
+└── docs/             # Documentation
+    ├── architecture/  # System design
+    ├── guides/       # User guides
+    ├── api/          # API reference
+    ├── testing/      # Test documentation
+    └── deployment/   # Deployment guides
 ```
+
+See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed directory structure.
 
 ## 🛠️ Tech Stack
 
@@ -61,68 +77,69 @@ SOCShield/
 
 ## 🚦 Getting Started
 
+> **📖 For detailed instructions, see [docs/guides/START_HERE.md](docs/guides/START_HERE.md)**
+
+### Quick Start
+
+**Easiest way:**
+```bash
+./scripts/start-services.sh
+```
+
+Then open http://localhost:3000
+
 ### Prerequisites
 
 - Node.js 18+ and npm/yarn
 - Python 3.11+
-- PostgreSQL 15+
-- Redis 7+
+- PostgreSQL 15+ (optional)
+- Redis 7+ (optional)
 - Docker (optional)
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/socshield.git
-   cd socshield
-   ```
-
-2. **Set up the backend**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-3. **Set up the frontend**
-   ```bash
-   cd frontend
-   npm install
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
-   ```
-
-4. **Set up the database**
-   ```bash
-   cd backend
-   alembic upgrade head
-   ```
-
-5. **Start the services**
-   ```bash
-   # Terminal 1 - Backend
-   cd backend
-   uvicorn app.main:app --reload
-
-   # Terminal 2 - Celery Worker
-   cd backend
-   celery -A app.worker worker --loglevel=info
-
-   # Terminal 3 - Frontend
-   cd frontend
-   npm run dev
-   ```
-
-### Using Docker
+### Easy Start (Recommended)
 
 ```bash
-docker-compose up -d
+# From project root
+./scripts/start-services.sh
 ```
 
-## 📖 Configuration
+This will automatically start both backend (port 8000) and frontend (port 3000).
+
+### Manual Start
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+source venv/bin/activate
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+### Access Points
+- **Frontend**: http://localhost:3000
+- **Dashboard**: http://localhost:3000/dashboard
+- **API Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
+
+For detailed setup instructions, see [docs/guides/QUICK_START_NOW.md](docs/guides/QUICK_START_NOW.md)
+
+## � Documentation
+
+- **[📖 Start Here](docs/guides/START_HERE.md)** - Quick start guide
+- **[🏗️ Architecture](docs/architecture/ARCHITECTURE.md)** - System design
+- **[🔌 API Examples](docs/api/API_EXAMPLES.md)** - API usage
+- **[🧪 Testing Guide](docs/testing/TESTING.md)** - How to test
+- **[🚀 Deployment](docs/deployment/VERCEL_DEPLOYMENT.md)** - Deploy to production
+- **[📁 Directory Structure](DIRECTORY_STRUCTURE.md)** - Project organization
+
+## �📖 Configuration
+
+> **For detailed setup, see [docs/guides/API_KEYS_SETUP_GUIDE.md](docs/guides/API_KEYS_SETUP_GUIDE.md)**
 
 ### AI Provider Configuration
 
