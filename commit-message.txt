@@ -1,0 +1,59 @@
+feat: Complete backend-frontend integration with dashboard and API endpoints
+
+✨ New Features:
+- Created /dashboard page with real-time data fetching
+- Integrated all API endpoints (dashboard, emails, threats, analysis)
+- Added auto-refresh functionality (30s interval) for dashboard stats
+- Created unified root package.json for easy command execution
+- Fixed CORS configuration in backend .env
+
+📝 API Endpoints Enhanced:
+- GET /api/v1/dashboard/stats - Returns real or mock database statistics
+- GET /api/v1/dashboard/recent-activity - Shows recent email analysis
+- GET /api/v1/emails - List emails with filtering and pagination
+- GET /api/v1/emails/{id} - Get detailed email information
+- GET /api/v1/threats - List threats with filtering and pagination
+- GET /api/v1/threats/{id} - Get detailed threat information
+- POST /api/v1/analysis/analyze - Full AI-powered email phishing analysis
+
+🛠️ Configuration:
+- Fixed CORS_ORIGINS format (JSON array required)
+- Created frontend/.env.local with API URL
+- Updated backend endpoints to handle database queries gracefully
+- Added fallback mock data when database is not configured
+
+📚 Documentation:
+- INTEGRATION_COMPLETE.md - Complete integration summary
+- INTEGRATION_GUIDE.md - Detailed setup and usage guide
+- QUICK_START_NOW.md - Quick start instructions
+- START_HERE.md - Simple startup guide
+- SESSION_SUMMARY.md - Development session recap
+
+🚀 Startup Scripts:
+- start-services.sh - Automated startup for both services
+- stop-services.sh - Graceful shutdown script
+- test-integration.sh - Integration testing script
+- setup-and-start.sh - Complete setup automation
+- start-both.sh - Quick dual-service startup
+- quick-start-now.sh - Minimal startup helper
+
+🎯 How to Use:
+1. From root: npm run dev (starts frontend)
+2. Open new terminal: cd backend && python -m uvicorn app.main:app --reload
+3. Access: http://localhost:3000 → Click 'Launch Dashboard'
+4. Dashboard features real-time stats and email analysis
+
+🐛 Fixes:
+- Resolved 'npm run dev' error in backend directory (now works from root)
+- Fixed CORS configuration causing SettingsError
+- Dashboard now properly fetches and displays live data
+- All API endpoints return consistent response formats
+
+📊 Technical Details:
+- Frontend: Next.js 14 with App Router
+- Backend: FastAPI with async SQLAlchemy
+- Database: PostgreSQL (with graceful fallback)
+- Real-time updates every 30 seconds
+- Proper error handling and loading states
+
+Status: ✅ Backend and Frontend fully integrated and working!

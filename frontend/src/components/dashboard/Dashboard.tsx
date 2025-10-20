@@ -1,13 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Mail, AlertTriangle, Activity } from 'lucide-react';
 import StatsCard from './StatsCard';
 import ThreatFeed from './ThreatFeed';
 import AnalysisPanel from './AnalysisPanel';
+import { getDashboardStats } from '@/lib/api';
 
 export default function Dashboard() {
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [stats, setStats] = useState({
+    total_emails: 0,
+    threats_detected: 0,
+    emails_today: 0,
+    detection_rate: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+    // Refresh stats every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -68,31 +94,31 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatsCard
                 title="Total Emails Scanned"
-                value="1,247"
+                value={loading ? "..." : stats.total_emails.toLocaleString()}
                 change="+12.5%"
                 icon={<Mail className="w-6 h-6 text-blue-600" />}
                 trend="up"
               />
               <StatsCard
                 title="Threats Detected"
-                value="47"
+                value={loading ? "..." : stats.threats_detected.toString()}
                 change="+8.2%"
                 icon={<AlertTriangle className="w-6 h-6 text-red-600" />}
                 trend="up"
               />
               <StatsCard
                 title="Detection Rate"
-                value="95.4%"
+                value={loading ? "..." : `${(stats.detection_rate * 100).toFixed(1)}%`}
                 change="+2.1%"
                 icon={<Activity className="w-6 h-6 text-green-600" />}
                 trend="up"
               />
               <StatsCard
-                title="Avg Detection Time"
-                value="19s"
+                title="Emails Today"
+                value={loading ? "..." : stats.emails_today.toString()}
                 change="-15.3%"
                 icon={<Activity className="w-6 h-6 text-purple-600" />}
-                trend="down"
+                trend="up"
               />
             </div>
 
