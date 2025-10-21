@@ -38,12 +38,16 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing cache system...")
     await init_cache()
     
-    # Create database tables
+        # Create database tables (if database is available)
     logger.info("Creating database tables...")
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("✅ Database tables created")
+    except Exception as e:
+        logger.warning(f"⚠️  Database unavailable, using mock data: {str(e)}")
+        logger.info("✅ Running in mock data mode")
     
-    logger.info("✅ Database tables created")
     logger.info(f"🤖 AI Provider: {settings.AI_PROVIDER}")
     logger.info(f"🔒 Security features enabled: Auto-quarantine={settings.ENABLE_AUTO_QUARANTINE}")
     logger.info("✨ SOCShield is ready!")
