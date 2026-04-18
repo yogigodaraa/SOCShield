@@ -30,7 +30,7 @@ torch==2.1.1
 spacy==3.7.2
 
 # NLP & Text Processing
-nltk==3.8.1
+nltk==3.9.4
 beautifulsoup4==4.12.2
 lxml==4.9.3
 regex==2023.10.3
