@@ -62,7 +62,7 @@ numpy==1.26.2
 
 # Utilities
 python-dateutil==2.9.0.post0
-pytz==2023.3.post1
+pytz==2026.5
 validators==0.35.0
 tldextract==5.1.0
 python-slugify==8.0.1
